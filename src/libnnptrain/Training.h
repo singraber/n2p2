@@ -41,7 +41,15 @@ public:
         /// Kalman filter-based methods.
         UT_KF,
         /// Levenberg-Marquardt algorithm.
-        UT_LM
+        UT_LM,
+
+// #####
+
+        /// Molecular Dynamics
+        UT_MD
+
+// #####
+
     };
 
     /** Training parallelization mode.
