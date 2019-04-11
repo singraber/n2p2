@@ -1706,8 +1706,12 @@ void Training::setEpochSchedule()
     // Fill with as many "1"s as there are force updates.
     fill(epochSchedule.begin(), epochSchedule.begin() + forceUpdates, 1);
 
-    // Now shuffle the schedule to get a random sequence.
-    shuffle(epochSchedule.begin(), epochSchedule.end(), rngGlobalNew);
+    // Artificial MD does not require shuffling.
+    if (updaterType != UT_MD)
+    {
+        // Now shuffle the schedule to get a random sequence.
+        shuffle(epochSchedule.begin(), epochSchedule.end(), rngGlobalNew);
+    }
 
     //for (size_t i = 0; i < epochSchedule.size(); ++i)
     //{
@@ -1851,6 +1855,10 @@ void Training::loop()
             update(force);
             if (force) numUpdatesForce++;
             else       numUpdatesEnergy++;
+        }
+        if (updaterType == UT_MD)
+        {
+            updateMD();
         }
         swTrain.stop();
 
@@ -2111,6 +2119,14 @@ void Training::update(bool force)
             }
             //log << strpr(" %zu final os: %zu\n", i, offset.at(i));
         }
+        // Gradients for artificial MD require different calculation.
+        // Need temporary storage for this update candidate.
+        vector<double> gradientMD;
+        if (updaterType == UT_MD)
+        {
+            // Size should be equal to combined Jacobian vector.
+            gradientMD.resize(jacobian->at(0).size(), 0.0);
+        }
         // Loop over atoms and calculate atomic energy contributions.
         for (vector<Atom>::iterator it = s.atoms.begin();
              it != s.atoms.end(); ++it)
@@ -2138,9 +2154,19 @@ void Training::update(bool force)
             // Finally sum up Jacobian.
             if (updateStrategy == US_ELEMENT) iu = i;
             else iu = 0;
-            for (size_t j = 0; j < dXdc.at(i).size(); ++j)
+            if (updaterType == UT_MD)
             {
-                jacobian->at(iu).at(offset.at(i) + j) += dXdc.at(i).at(j);
+                for (size_t j = 0; j < dXdc.at(i).size(); ++j)
+                {
+                    gradientMD.at(offset.at(i) + j) += dXdc.at(i).at(j);
+                }
+            }
+            else
+            {
+                for (size_t j = 0; j < dXdc.at(i).size(); ++j)
+                {
+                    jacobian->at(iu).at(offset.at(i) + j) += dXdc.at(i).at(j);
+                }
             }
         }
  
@@ -2184,11 +2210,44 @@ void Training::update(bool force)
             if (force)
             {
                 Atom const& a = s.atoms.at(c->a);
-                error->at(0).at(offset2) +=  a.fRef[c->c] - a.f[c->c];
+                if (updaterType == UT_MD)
+                {
+                    double const dF = a.fRef[c->c] - a.f[c->c];
+                    double const fW2 = forceWeight * forceWeight;
+                    error->at(0).at(offset2) += fW2 * dF * dF;
+                    for (size_t i = 0; i < numElements; ++i)
+                    {
+                        for (size_t j = 0; j < gradientMD.size(); ++j)
+                        {
+                            jacobian->at(0).at(offset.at(i) + j) +=
+                                -2.0 * gradientMD.at(j) * dF * fW2;
+                        }
+                    }
+                }
+                else
+                {
+                    error->at(0).at(offset2) +=  a.fRef[c->c] - a.f[c->c];
+                }
             }
             else
             {
-                error->at(0).at(offset2) += s.energyRef - s.energy;
+                if (updaterType == UT_MD)
+                {
+                    double const dE = s.energyRef - s.energy;
+                    error->at(0).at(offset2) += dE * dE;
+                    for (size_t i = 0; i < numElements; ++i)
+                    {
+                        for (size_t j = 0; j < gradientMD.size(); ++j)
+                        {
+                            jacobian->at(0).at(offset.at(i) + j) +=
+                                -2.0 * gradientMD.at(j) * dE;
+                        }
+                    }
+                }
+                else
+                {
+                    error->at(0).at(offset2) += s.energyRef - s.energy;
+                }
             }
         }
         else if (updateStrategy == US_ELEMENT)
@@ -2303,32 +2362,37 @@ void Training::update(bool force)
 #ifdef _OPENMP
     omp_set_num_threads(num_threads);
 #endif
-    // Loop over all updaters.
-    for (size_t i = 0; i < updaters.size(); ++i)
+    // Artificial MD does not perform update here.
+    if (updaterType != UT_MD)
     {
-        updaters.at(i)->setError(&(error->at(i).front()), error->at(i).size());
-        updaters.at(i)->setJacobian(&(jacobian->at(i).front()),
-                                    error->at(i).size());
-        if (updaterType == UT_KF) 
+        // Loop over all updaters.
+        for (size_t i = 0; i < updaters.size(); ++i)
         {
-            KalmanFilter* kf = dynamic_cast<KalmanFilter*>(updaters.at(i));
-            kf->setSizeObservation(error->at(i).size());
+            updaters.at(i)->setError(&(error->at(i).front()),
+                                     error->at(i).size());
+            updaters.at(i)->setJacobian(&(jacobian->at(i).front()),
+                                        error->at(i).size());
+            if (updaterType == UT_KF) 
+            {
+                KalmanFilter* kf = dynamic_cast<KalmanFilter*>(updaters.at(i));
+                kf->setSizeObservation(error->at(i).size());
+            }
+            updaters.at(i)->update();
         }
-        updaters.at(i)->update();
-    }
-    countUpdates++;
+        countUpdates++;
 
-    // Redistribute weights to all MPI tasks.
-    if (parallelMode == PM_TRAIN_RK0)
-    {
-        for (size_t i = 0; i < numUpdaters; ++i)
+        // Redistribute weights to all MPI tasks.
+        if (parallelMode == PM_TRAIN_RK0)
         {
-            MPI_Bcast(&(weights.at(i).front()), weights.at(i).size(), MPI_DOUBLE, 0, comm);
+            for (size_t i = 0; i < numUpdaters; ++i)
+            {
+                MPI_Bcast(&(weights.at(i).front()), weights.at(i).size(), MPI_DOUBLE, 0, comm);
+            }
         }
-    }
 
-    // Set new weights in neural networks.
-    setWeights();
+        // Set new weights in neural networks.
+        setWeights();
+    }
 
     ///////////////////////////////////////////////////////////////////////
     // PART 5: Communicate candidates and RMSE fractions and write log.
@@ -2440,6 +2504,41 @@ void Training::update(bool force)
             }
         }
     }
+
+    return;
+}
+
+void Training::updateMD()
+{
+    // Sum up errors and gradients from energies and forces.
+    if (useForces)
+    {
+        // It should be safe to assume single updater and sum jacobi mode here.
+        errorE.at(0).at(0) += errorF.at(0).at(0);
+        for (size_t i = 0; i < jacobianE.at(0).size(); ++i)
+        {
+            jacobianE.at(0).at(i) += jacobianF.at(0).at(i);
+        }
+    }
+
+    // Only combined update strategy allowed for MD updater.
+    updaters.at(0)->setError(&(errorE.at(0).front()), errorE.at(0).size());
+    updaters.at(0)->setJacobian(&(jacobianE.at(0).front()),
+                                errorE.at(0).size());
+    updaters.at(0)->update();
+    countUpdates++;
+
+    // Redistribute weights to all MPI tasks.
+    if (parallelMode == PM_TRAIN_RK0)
+    {
+        for (size_t i = 0; i < numUpdaters; ++i)
+        {
+            MPI_Bcast(&(weights.at(i).front()), weights.at(i).size(), MPI_DOUBLE, 0, comm);
+        }
+    }
+
+    // Set new weights in neural networks.
+    setWeights();
 
     return;
 }

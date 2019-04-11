@@ -41,7 +41,9 @@ public:
         /// Kalman filter-based methods.
         UT_KF,
         /// Levenberg-Marquardt algorithm.
-        UT_LM
+        UT_LM,
+        /// Artificial molecular dynamics.
+        UT_MD
     };
 
     /** Training parallelization mode.
@@ -222,8 +224,18 @@ public:
     /** Perform one update.
      *
      * @param[in] force If true, perform force update, otherwise energy update.
+     *
+     * @note For artificial MD (UT_MD) this does NOT perform a weight update
+     *       but instead only prepares the gradient. Call updateMD() for the
+     *       actual weight update.
      */
     void                  update(bool force);
+    /** Perform an artificial MD update.
+     *
+     * Sums up the loss function and the gradients from energies and forces.
+     * Then calls updater to perform MD step.
+     */
+    void                  updateMD();
     /** Get a single weight value.
      *
      * @param[in] element Element index of weight.
