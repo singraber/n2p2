@@ -76,24 +76,12 @@ public:
      * Update the connections via steepest descent method.
      */
     void                     update();
-    /** Set parameters for fixed step gradient descent algorithm.
+    /** Set parameters for Verlet algorithm.
      *
-     * @param[in] eta Step size = ratio of gradient subtracted from current
-     *                weights.
+     * @param[in] dt Time step size for Verlet algorithm.
+     * @param[in] m Mass of artificial weight particles.
      */
-    void                     setParametersFixed(double const eta);
-    /** Set parameters for Adam algorithm.
-     *
-     * @param[in] eta Step size (corresponds to @f$\alpha@f$ in Adam
-     *                publication).
-     * @param[in] beta1 Decay rate 1 (first moment).
-     * @param[in] beta2 Decay rate 2 (second moment).
-     * @param[in] epsilon Small scalar.
-     */
-    void                     setParametersAdam(double const eta,
-                                               double const beta1,
-                                               double const beta2,
-                                               double const epsilon);
+    void                     setParametersVerlet(double const dt, double const m);
 
     /** Status report.
      *
@@ -126,14 +114,12 @@ private:
     std::vector<double> state_prev;
     /// State vector pointer.
     double*             state;
+    /// Dummy for caching actual state.
+    double              state_dummy;
     /// Error pointer (single double value).
     double const*       error;
     /// Gradient vector pointer.
     double const*       gradient;
-    /// First moment estimate (Adam).
-    std::vector<double> m;
-    /// Second moment estimate (Adam).
-    std::vector<double> v;
 };
 
 }

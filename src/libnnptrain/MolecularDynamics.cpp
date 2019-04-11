@@ -82,13 +82,19 @@ void MolecularDynamics::setJacobian(double const* const jacobian,
 
 void MolecularDynamics::update()
 {
-    if (dynamicsType == DT_VERLET)
+    if (type == DT_VERLET)
     {
         for (std::size_t i = 0; i < sizeState; ++i)
         {
-            // Verlet
+            // Cache the actual state at t
+            state_dummy = state[i];
+
+            // Verlet: generating new state at (t + dt)
 
             state[i] = 2 * state[i] - state_prev[i] + gradient[i] * dt * dt / m;
+
+            // Set the cached state as the previous state at (t - dt)
+            state_prev[i] = state_dummy;
         }
     }
 
