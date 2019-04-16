@@ -39,13 +39,13 @@ random_seed                     1234567        # Random number generator seed.
 ###############################################################################
 # These keywords are solely used for training with nnp-train.
 epochs                          10             # Number of training epochs.
-updater_type                    1              # Weight update method (0 = Gradient Descent, 1 = Kalman filter).
+updater_type                    3              # Weight update method (0 = Gradient Descent, 1 = Kalman filter, 3 = Molecular Dynamics).
 parallel_mode                   0              # Training parallelization used (0 = Parallel (rank 0 update), 1 = Parallel (all update)).
-jacobian_mode                   1              # Jacobian computation mode (0 = Summation to single gradient, 1 = Per-task summed gradient, 2 = Full Jacobian).
+jacobian_mode                   0              # Jacobian computation mode (0 = Summation to single gradient, 1 = Per-task summed gradient, 2 = Full Jacobian).
 update_strategy                 0              # Update strategy (0 = Combined, 1 = Per-element).
 selection_mode                  2              # Update candidate selection mode (0 = Random, 1 = Sort, 2 = Threshold).
-task_batch_size_energy          1              # Number of energy update candidates prepared per task for each update (0 = Entire training set).
-task_batch_size_force           1              # Number of force update candidates prepared per task for each update (0 = Entire training set).
+task_batch_size_energy          0              # Number of energy update candidates prepared per task for each update (0 = Entire training set).
+task_batch_size_force           0              # Number of force update candidates prepared per task for each update (0 = Entire training set).
 memorize_symfunc_results                       # Keep symmetry function results in memory.
 test_fraction                   0.1            # Fraction of structures kept for testing.
 force_weight                    10.0           # Weight of force updates relative to energy updates.
@@ -98,6 +98,13 @@ kalman_etamax                   1.0            # Standard Kalman filter paramete
 #kalman_qmin                     0.0E-6         # General Kalman filter parameter qmin (typ. 1.0E-6).
 #kalman_lambda_short             0.96000        # Fading memory Kalman filter parameter lambda (forgetting factor 0.95-0.99).
 #kalman_nue_short                0.99950        # Fading memory Kalman filter parameter nu (0.99-0.9995).
+######################
+# MOLECULAR DYNAMICS #
+######################
+# This section is only used if "updater_type" is "3".
+dynamics_type                   0              # Molecular Dynamics type (0 = Standard)
+dynamics_dt                     0.0625         # Time step size for Verlet algorithm
+dynamics_m                      1.0            # Mass for artificial weight particles
 
 ###############################################################################
 # SYMMETRY FUNCTIONS

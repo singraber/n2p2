@@ -17,6 +17,7 @@
 #include "Training.h"
 #include "GradientDescent.h"
 #include "KalmanFilter.h"
+#include "MolecularDynamics.h"
 #include "NeuralNetwork.h"
 #include "Stopwatch.h"
 #include "utility.h"
@@ -99,6 +100,10 @@ Training::~Training()
         else if (updaterType == UT_KF)
         {
             delete dynamic_cast<KalmanFilter*>(*it);
+        }
+        else if (updaterType == UT_MD)
+        {
+            delete dynamic_cast<MolecularDynamics*>(*it);
         }
     }
 
@@ -434,6 +439,12 @@ void Training::setupTraining()
                      "selected: updaterType::UT_LM (%d)\n",
                      updaterType);
     }
+    else if (updaterType == UT_MD)
+    {
+        log << strpr("Weight update via MD selected: "
+                     "updaterType::UT_MD (%d)\n",
+                     updaterType);
+    }
     else
     {
         throw runtime_error("ERROR: Unknown updater type.\n");
@@ -495,6 +506,11 @@ void Training::setupTraining()
     if (updaterType == UT_GD && jacobianMode != JM_SUM)
     {
         throw runtime_error("ERROR: Gradient descent methods can only be "
+                            "combined with Jacobian mode JM_SUM.\n");
+    }
+    if (updaterType == UT_MD && jacobianMode != JM_SUM)
+    {
+        throw runtime_error("ERROR: MD method can only be "
                             "combined with Jacobian mode JM_SUM.\n");
     }
 
@@ -736,6 +752,11 @@ void Training::setupTraining()
     epochFractionEnergies = atof(settings["short_energy_fraction"].c_str());
     taskBatchSizeEnergy
         = (size_t)atoi(settings["task_batch_size_energy"].c_str());
+
+    if (updaterType == UT_MD && taskBatchSizeEnergy > 0)
+    {
+        throw runtime_error("ERROR: Energy batch size must be set to 0 for MD updater type.\n");
+    }
     if (taskBatchSizeEnergy == 0)
     {
         energiesPerUpdate = static_cast<size_t>(updateCandidatesEnergy.size()
@@ -804,6 +825,11 @@ void Training::setupTraining()
         epochFractionForces = atof(settings["short_force_fraction"].c_str());
         taskBatchSizeForce
             = (size_t)atoi(settings["task_batch_size_force"].c_str());
+
+        if (updaterType == UT_MD && taskBatchSizeForce > 0)
+        {
+            throw runtime_error("ERROR: Force batch size must be set to 0 for MD updater type.\n");
+        }
         if (taskBatchSizeForce == 0)
         {
             forcesPerUpdate = static_cast<size_t>(updateCandidatesForce.size()
@@ -956,6 +982,12 @@ void Training::setupTraining()
         kalmanType = (KalmanFilter::KalmanType)
                      atoi(settings["kalman_type"].c_str());
     }
+    MolecularDynamics::DynamicsType dynamicsType = MolecularDynamics::DT_VERLET;
+    if (updaterType == UT_MD)
+    {
+        dynamicsType = (MolecularDynamics::DynamicsType)
+                       atoi(settings["dynamics_type"].c_str());
+    }
 
     for (size_t i = 0; i < numUpdaters; ++i)
     {
@@ -972,6 +1004,12 @@ void Training::setupTraining()
                 updaters.push_back(
                     (Updater*)new KalmanFilter(numWeightsPerUpdater.at(i),
                                                kalmanType));
+            }
+            else if (updaterType == UT_MD)
+            {
+                updaters.push_back(
+                    (Updater*)new MolecularDynamics(numWeightsPerUpdater.at(i),
+                                               dynamicsType));
             }
             updaters.back()->setState(&(weights.at(i).front()));
         }
@@ -1064,6 +1102,21 @@ void Training::setupTraining()
                                              qmin,
                                              lambda,
                                              nu);
+            }
+        }
+    }
+    else if (hasUpdaters && updaterType == UT_MD)
+    {
+        if (dynamicsType == MolecularDynamics::DT_VERLET)
+        {
+            double const type = atof((settings["dynamics_type"].c_str()));
+            double const dt   = atof((settings["dynamics_dt"].c_str()));
+            double const m    = atof((settings["dynamics_m"].c_str()));
+
+            for (size_t i = 0; i < updaters.size(); ++i)
+            {
+                MolecularDynamics* u = dynamic_cast<MolecularDynamics*>(updaters.at(i));
+                u->setParametersVerlet(dt, m);
             }
         }
     }
