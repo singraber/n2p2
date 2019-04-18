@@ -2,9 +2,9 @@
 # DATA SET NORMALIZATION
 ###############################################################################
 # This section was automatically added by nnp-norm.
-mean_energy  -2.3353824022135491E-01
-conv_energy   8.5167544626563699E+02
-conv_length   2.2798325235535355E+01
+#mean_energy  -2.3353824022135491E-01
+#conv_energy   8.5167544626563699E+02
+#conv_length   2.2798325235535355E+01
 ###############################################################################
 
 ###############################################################################
@@ -13,8 +13,8 @@ conv_length   2.2798325235535355E+01
 # These keywords are (almost) always required.
 number_of_elements              2              # Number of elements.
 elements                        H O            # Specification of elements.
-atom_energy                     H -0.45890771  # Free atom reference energy (H).
-atom_energy                     O -74.94518524 # Free atom reference energy (O).
+#atom_energy                     H -0.45890771  # Free atom reference energy (H).
+#atom_energy                     O -74.94518524 # Free atom reference energy (O).
 cutoff_type                     2              # Cutoff type (optional argument: shift parameter alpha).
 scale_symmetry_functions                       # Scale all symmetry functions with min/max values.
 #scale_symmetry_functions_sigma                 # Scale all symmetry functions with sigma.
@@ -31,19 +31,19 @@ global_activation_short         t t l          # Activation function for each hi
 ###############################################################################
 # These keywords are used only by some tools handling data sets:
 # nnp-comp2, nnp-scaling, nnp-dataset, nnp-train.
-use_short_forces                               # Use forces.
+#use_short_forces                               # Use forces.
 random_seed                     1234567        # Random number generator seed.
 
 ###############################################################################
 # ADDITIONAL SETTINGS FOR TRAINING
 ###############################################################################
 # These keywords are solely used for training with nnp-train.
-epochs                          10             # Number of training epochs.
+epochs                          20             # Number of training epochs.
 updater_type                    3              # Weight update method (0 = Gradient Descent, 1 = Kalman filter, 3 = Molecular Dynamics).
 parallel_mode                   0              # Training parallelization used (0 = Parallel (rank 0 update), 1 = Parallel (all update)).
 jacobian_mode                   0              # Jacobian computation mode (0 = Summation to single gradient, 1 = Per-task summed gradient, 2 = Full Jacobian).
 update_strategy                 0              # Update strategy (0 = Combined, 1 = Per-element).
-selection_mode                  2              # Update candidate selection mode (0 = Random, 1 = Sort, 2 = Threshold).
+selection_mode                  0              # Update candidate selection mode (0 = Random, 1 = Sort, 2 = Threshold).
 task_batch_size_energy          0              # Number of energy update candidates prepared per task for each update (0 = Entire training set).
 task_batch_size_force           0              # Number of force update candidates prepared per task for each update (0 = Entire training set).
 memorize_symfunc_results                       # Keep symmetry function results in memory.
@@ -60,9 +60,9 @@ weights_max                     1.0            # Maximum value for initial rando
 #precondition_weights                           # Precondition weights with initial energies.
 #nguyen_widrow_weights_short                    # Initialize neural network weights according to Nguyen-Widrow scheme.
 write_trainpoints               1              # Write energy comparison every this many epochs.
-write_trainforces               1              # Write force comparison every this many epochs.
-write_weights_epoch             1              # Write weights every this many epochs.
-write_neuronstats               1              # Write neuron statistics every this many epochs.
+#write_trainforces               1              # Write force comparison every this many epochs.
+#write_weights_epoch             1              # Write weights every this many epochs.
+#write_neuronstats               1              # Write neuron statistics every this many epochs.
 write_trainlog                                 # Write training log file.
 ####################
 # GRADIENT DESCENT #
@@ -103,7 +103,7 @@ kalman_etamax                   1.0            # Standard Kalman filter paramete
 ######################
 # This section is only used if "updater_type" is "3".
 dynamics_type                   0              # Molecular Dynamics type (0 = Standard)
-dynamics_dt                     0.0625         # Time step size for Verlet algorithm
+dynamics_dt                     0.0001         # Time step size for Verlet algorithm
 dynamics_m                      1.0            # Mass for artificial weight particles
 
 ###############################################################################

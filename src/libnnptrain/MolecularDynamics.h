@@ -25,7 +25,7 @@
 namespace nnp
 {
 
-/// Weight updates based on simple gradient descent methods.
+/// Weight updates based on artificial MD in weight parameter space.
 class MolecularDynamics : public Updater
 {
 public:
@@ -33,7 +33,9 @@ public:
     enum DynamicsType
     {
         /// Verlet algorithm.
-        DT_VERLET
+        DT_VERLET,
+        /// Velocity-Verlet algorithm.
+        DT_VELOCITYVERLET
     };
 
     /** %MolecularDynamics class constructor.
@@ -71,6 +73,9 @@ public:
      */
     void                     setJacobian(double const* const jacobian,
                                          std::size_t const   columns = 1);
+    /** Pre-update step required by some MD integrators.
+     */
+    void                     preUpdateMD();
     /** Perform connection update.
      *
      * Update the connections via steepest descent method.
@@ -81,7 +86,8 @@ public:
      * @param[in] dt Time step size for Verlet algorithm.
      * @param[in] m Mass of artificial weight particles.
      */
-    void                     setParametersVerlet(double const dt, double const m);
+    void                     setParametersVerlet(double const dt,
+                                                 double const m);
 
     /** Status report.
      *

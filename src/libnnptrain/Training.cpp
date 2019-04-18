@@ -1009,7 +1009,10 @@ void Training::setupTraining()
             {
                 updaters.push_back(
                     (Updater*)new MolecularDynamics(numWeightsPerUpdater.at(i),
-                                               dynamicsType));
+                                                    dynamicsType));
+                // Need to set pointer to error already here for logging.
+                updaters.back()->setError(&(errorE.at(0).front()),
+                                          errorE.at(0).size());
             }
             updaters.back()->setState(&(weights.at(i).front()));
         }
@@ -1109,15 +1112,20 @@ void Training::setupTraining()
     {
         if (dynamicsType == MolecularDynamics::DT_VERLET)
         {
-            double const type = atof((settings["dynamics_type"].c_str()));
-            double const dt   = atof((settings["dynamics_dt"].c_str()));
-            double const m    = atof((settings["dynamics_m"].c_str()));
+            double const dt = atof((settings["dynamics_dt"].c_str()));
+            double const m  = atof((settings["dynamics_m"].c_str()));
 
             for (size_t i = 0; i < updaters.size(); ++i)
             {
-                MolecularDynamics* u = dynamic_cast<MolecularDynamics*>(updaters.at(i));
+                MolecularDynamics* u 
+                    = dynamic_cast<MolecularDynamics*>(updaters.at(i));
                 u->setParametersVerlet(dt, m);
             }
+        }
+        else if (dynamicsType == MolecularDynamics::DT_VELOCITYVERLET)
+        {
+            throw runtime_error("ERROR: Velocity-Verlet algorithm not yet"
+                                " implemented.\n");
         }
     }
 
@@ -1861,7 +1869,7 @@ void Training::loop()
     if (myRank == 0) writeLearningCurve(false);
 
     // Write updater status to file.
-    //if (myRank == 0) writeUpdaterStatus(false);
+    if (myRank == 0) writeUpdaterStatus(false);
 
     // Write neuron statistics.
     writeNeuronStatisticsEpoch();
@@ -1902,6 +1910,12 @@ void Training::loop()
 
         // Perform energy/force updates according to schedule.
         swTrain.start();
+        if (updaterType == UT_MD)
+        {
+            MolecularDynamics* u 
+                = dynamic_cast<MolecularDynamics*>(updaters.at(0));
+            u->preUpdateMD();
+        }
         for (size_t i = 0; i < epochSchedule.size(); ++i)
         {
             bool force = static_cast<bool>(epochSchedule.at(i));
@@ -1937,7 +1951,7 @@ void Training::loop()
         if (myRank == 0) writeLearningCurve(true);
 
         // Write updater status to file.
-        //if (myRank == 0) writeUpdaterStatus(true);
+        if (myRank == 0) writeUpdaterStatus(true);
 
         // Write neuron statistics.
         writeNeuronStatisticsEpoch();
@@ -2267,14 +2281,11 @@ void Training::update(bool force)
                 {
                     double const dF = a.fRef[c->c] - a.f[c->c];
                     double const fW2 = forceWeight * forceWeight;
-                    error->at(0).at(offset2) += fW2 * dF * dF;
-                    for (size_t i = 0; i < numElements; ++i)
+                    error->at(0).at(0) += fW2 * dF * dF;
+                    for (size_t i = 0; i < gradientMD.size(); ++i)
                     {
-                        for (size_t j = 0; j < gradientMD.size(); ++j)
-                        {
-                            jacobian->at(0).at(offset.at(i) + j) +=
-                                -2.0 * gradientMD.at(j) * dF * fW2;
-                        }
+                        jacobian->at(0).at(i) += -2.0 * gradientMD.at(i)
+                                               * dF * fW2;
                     }
                 }
                 else
@@ -2287,14 +2298,10 @@ void Training::update(bool force)
                 if (updaterType == UT_MD)
                 {
                     double const dE = s.energyRef - s.energy;
-                    error->at(0).at(offset2) += dE * dE;
-                    for (size_t i = 0; i < numElements; ++i)
+                    error->at(0).at(0) += dE * dE;
+                    for (size_t i = 0; i < gradientMD.size(); ++i)
                     {
-                        for (size_t j = 0; j < gradientMD.size(); ++j)
-                        {
-                            jacobian->at(0).at(offset.at(i) + j) +=
-                                -2.0 * gradientMD.at(j) * dE;
-                        }
+                        jacobian->at(0).at(i) += -2.0 * gradientMD.at(i) * dE;
                     }
                 }
                 else

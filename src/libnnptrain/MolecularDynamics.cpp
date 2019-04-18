@@ -22,8 +22,8 @@
 using namespace std;
 using namespace nnp;
 
-MolecularDynamics::MolecularDynamics(size_t const      sizeState,
-                                 DynamicsType const type) :
+MolecularDynamics::MolecularDynamics(size_t const       sizeState,
+                                     DynamicsType const type) :
     Updater (sizeState),
     n       (0          ),
     type    (type),
@@ -65,7 +65,7 @@ void MolecularDynamics::setState(double* state)
 }
 
 void MolecularDynamics::setError(double const* const error,
-                               size_t const /* size */)
+                                 size_t const /* size */)
 {
     this->error = error;
 
@@ -73,10 +73,15 @@ void MolecularDynamics::setError(double const* const error,
 }
 
 void MolecularDynamics::setJacobian(double const* const jacobian,
-                                  size_t const        /* columns*/)
+                                    size_t const /* columns*/)
 {
     this->gradient = jacobian;
 
+    return;
+}
+
+void MolecularDynamics::preUpdateMD()
+{
     return;
 }
 
@@ -90,8 +95,7 @@ void MolecularDynamics::update()
             state_dummy = state[i];
 
             // Verlet: generating new state at (t + dt)
-
-            state[i] = 2 * state[i] - state_prev[i] + gradient[i] * dt * dt / m;
+            state[i] = 2 * state[i] - state_prev[i] - gradient[i] * dt * dt / m;
 
             // Set the cached state as the previous state at (t - dt)
             state_prev[i] = state_dummy;
@@ -113,7 +117,7 @@ void MolecularDynamics::setParametersVerlet(double const dt, double const m)
 
 string MolecularDynamics::status(size_t epoch) const
 {
-    string s = strpr("%10zu %10zu", epoch, n);
+    string s = strpr("%10zu %10zu %16.8E", epoch, n, error[0]);
 
     s += '\n';
 
@@ -134,7 +138,10 @@ vector<string> MolecularDynamics::statusHeader() const
     colInfo.push_back("Training epoch.");
     colSize.push_back(10);
     colName.push_back("n");
-    colInfo.push_back("Integration step");
+    colInfo.push_back("Integration step.");
+    colSize.push_back(16);
+    colName.push_back("loss");
+    colInfo.push_back("Loss function: MSE of energies (and forces).");
 
     header = createFileHeader(title, colSize, colName, colInfo);
 
