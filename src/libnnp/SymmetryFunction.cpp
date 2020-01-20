@@ -228,6 +228,7 @@ SymmetryFunction::PrintFormat const SymmetryFunction::initializePrintFormat()
     pf["eta"]         = make_pair("%9.3E", string(9, ' '));
     pf["rs"]          = make_pair("%9.3E", string(9, ' '));
     pf["lambda"]      = make_pair("%2.0f", string(2, ' '));
+    pf["thetaShift"]  = make_pair("%5.1f", string(5, ' '));
     pf["zeta"]        = make_pair("%4.1f", string(4, ' '));
     pf["rc"]          = make_pair("%9.3E", string(9, ' '));
     pf["cutoffType"]  = make_pair("%2d"  , string(2, ' '));
@@ -249,6 +250,7 @@ SymmetryFunction::PrintOrder const SymmetryFunction::initializePrintOrder()
     po.push_back("eta"        );
     po.push_back("rs"         );
     po.push_back("lambda"     );
+    po.push_back("thetaShift" );
     po.push_back("zeta"       );
     po.push_back("rc"         );
     po.push_back("cutoffType" );

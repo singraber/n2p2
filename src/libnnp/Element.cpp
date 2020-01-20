@@ -21,6 +21,7 @@
 #include "SymmetryFunctionRadial.h"
 #include "SymmetryFunctionAngularNarrow.h"
 #include "SymmetryFunctionAngularWide.h"
+#include "SymmetryFunctionAngularWideShift.h"
 #include "SymmetryFunctionWeightedRadial.h"
 #include "SymmetryFunctionWeightedAngular.h"
 #include "SymmetryFunctionGroup.h"
@@ -100,6 +101,11 @@ void Element::addSymmetryFunction(string const& parameters,
     {
         symmetryFunctions.push_back(
             new SymmetryFunctionWeightedAngular(elementMap));
+    }
+    else if (type == 91)
+    {
+        symmetryFunctions.push_back(
+            new SymmetryFunctionAngularWideShift(elementMap));
     }
     else
     {

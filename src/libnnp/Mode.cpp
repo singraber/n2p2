@@ -333,6 +333,7 @@ void Mode::setupSymmetryFunctions()
     log << "eta .... Gaussian width eta.\n";
     log << "rs ..... Shift distance of Gaussian.\n";
     log << "la ..... Angle prefactor lambda.\n";
+    log << "theta .. Angular shift in cosine.\n";
     log << "zeta ... Angle term exponent zeta.\n";
     log << "rc ..... Cutoff radius.\n";
     log << "ct ..... Cutoff type.\n";
@@ -352,7 +353,7 @@ void Mode::setupSymmetryFunctions()
         log << "-----------------------------------------"
                "--------------------------------------\n";
         log << " ind ec ty e1 e2       eta        rs la "
-               "zeta        rc ct   ca    ln\n";
+               "theta zeta        rc ct   ca    ln\n";
         log << "-----------------------------------------"
                "--------------------------------------\n";
         log << it->infoSymmetryFunctionParameters();
