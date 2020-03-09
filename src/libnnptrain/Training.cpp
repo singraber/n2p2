@@ -1145,6 +1145,15 @@ void Training::setupTraining()
             log << "-----------------------------------------"
                    "--------------------------------------\n";
             log << updaters.at(i)->info();
+            if (updaterType == UT_KF)
+            {
+                log << "Note: During training loop the actual observation\n";
+                log << "      size corresponds to error vector size:\n";
+                log << strpr("sizeObservation = %zu (energy updates)\n",
+                             errorE.at(i).size());
+                log << strpr("sizeObservation = %zu (force  updates)\n",
+                             errorF.at(i).size());
+            }
             log << "-----------------------------------------"
                    "--------------------------------------\n";
     }
@@ -2200,7 +2209,11 @@ void Training::update(bool force)
         {
             // For force update save derivative of symmetry function with
             // respect to coordinate.
+#ifdef IMPROVED_SFD_MEMORY
+            if (force) collectDGdxia((*it), c->a, c->c);
+#else 
             if (force) it->collectDGdxia(c->a, c->c);
+#endif
             size_t i = it->element;
             NeuralNetwork* const& nn = elements.at(i).neuralNetwork;
             nn->setInput(&((it->G).front()));
@@ -2211,8 +2224,13 @@ void Training::update(bool force)
             // network connections (weights + biases).
             if (force)
             {
+#ifdef IMPROVED_SFD_MEMORY
+                nn->calculateDFdc(&(dXdc.at(i).front()),
+                                  &(dGdxia.front()));
+#else 
                 nn->calculateDFdc(&(dXdc.at(i).front()),
                                   &(it->dGdxia.front()));
+#endif
             }
             else
             {
@@ -2603,36 +2621,6 @@ void Training::updateMD()
     return;
 }
 
-// Doxygen requires namespace prefix for arguments...
-void Training::addTrainingLogEntry(int                 proc,
-                                   std::size_t         il,
-                                   double              f,
-                                   std::size_t         isg,
-                                   std::size_t         is)
-{
-    string s = strpr("  E %5zu %10zu %5d %3zu %10.2E %10zu %5zu\n",
-                     epoch, countUpdates, proc, il + 1, f, isg, is);
-    trainingLog << s;
-
-    return;
-}
-
-// Doxygen requires namespace prefix for arguments...
-void Training::addTrainingLogEntry(int                 proc,
-                                   std::size_t         il,
-                                   double              f,
-                                   std::size_t         isg,
-                                   std::size_t         is,
-                                   std::size_t         ia,
-                                   std::size_t         ic)
-{
-    string s = strpr("  F %5zu %10zu %5d %3zu %10.2E %10zu %5zu %5zu %2zu\n",
-                     epoch, countUpdates, proc, il + 1, f, isg, is, ia, ic);
-    trainingLog << s;
-
-    return;
-}
-
 double Training::getSingleWeight(size_t element, size_t index)
 {
     getWeights();
@@ -2712,13 +2700,21 @@ vector<double> > Training::calculateWeightDerivatives(Structure*  structure,
     for (vector<Atom>::iterator it = s.atoms.begin();
          it != s.atoms.end(); ++it)
     {
+#ifdef IMPROVED_SFD_MEMORY
+        collectDGdxia((*it), atom, component);
+#else 
         it->collectDGdxia(atom, component);
+#endif
         size_t i = it->element;
         NeuralNetwork* const& nn = elements.at(i).neuralNetwork;
         nn->setInput(&((it->G).front()));
         nn->propagate();
         nn->getOutput(&(it->energy));
+#ifdef IMPROVED_SFD_MEMORY
+        nn->calculateDFdc(&(dfdc.at(i).front()), &(dGdxia.front()));
+#else 
         nn->calculateDFdc(&(dfdc.at(i).front()), &(it->dGdxia.front()));
+#endif
         for (size_t j = 0; j < dfdc.at(i).size(); ++j)
         {
             dFdc.at(i).at(j) += dfdc.at(i).at(j);
@@ -2788,3 +2784,72 @@ void Training::setWeights()
 
     return;
 }
+
+// Doxygen requires namespace prefix for arguments...
+void Training::addTrainingLogEntry(int                 proc,
+                                   std::size_t         il,
+                                   double              f,
+                                   std::size_t         isg,
+                                   std::size_t         is)
+{
+    string s = strpr("  E %5zu %10zu %5d %3zu %10.2E %10zu %5zu\n",
+                     epoch, countUpdates, proc, il + 1, f, isg, is);
+    trainingLog << s;
+
+    return;
+}
+
+// Doxygen requires namespace prefix for arguments...
+void Training::addTrainingLogEntry(int                 proc,
+                                   std::size_t         il,
+                                   double              f,
+                                   std::size_t         isg,
+                                   std::size_t         is,
+                                   std::size_t         ia,
+                                   std::size_t         ic)
+{
+    string s = strpr("  F %5zu %10zu %5d %3zu %10.2E %10zu %5zu %5zu %2zu\n",
+                     epoch, countUpdates, proc, il + 1, f, isg, is, ia, ic);
+    trainingLog << s;
+
+    return;
+}
+
+#ifdef IMPROVED_SFD_MEMORY
+void Training::collectDGdxia(Atom const& atom,
+                             size_t      indexAtom,
+                             size_t      indexComponent)
+{
+    size_t const nsf = atom.numSymmetryFunctions;
+
+    // Reset dGdxia array.
+    dGdxia.clear();
+    vector<double>(dGdxia).swap(dGdxia);
+    dGdxia.resize(nsf, 0.0);
+
+    vector<vector<size_t> > const& tableFull
+        = elements.at(atom.element).getSymmetryFunctionTable();
+
+    for (size_t i = 0; i < atom.numNeighbors; i++)
+    {
+        if (atom.neighbors[i].index == indexAtom)
+        {
+            Atom::Neighbor const& n = atom.neighbors[i];
+            vector<size_t> const& table = tableFull.at(n.element);
+            for (size_t j = 0; j < n.dGdr.size(); ++j)
+            {
+                dGdxia[table.at(j)] += n.dGdr[j][indexComponent];
+            }
+        }
+    }
+    if (atom.index == indexAtom)
+    {
+        for (size_t i = 0; i < nsf; ++i)
+        {
+            dGdxia[i] += atom.dGdr[i][indexComponent];
+        }
+    }
+
+    return;
+}
+#endif

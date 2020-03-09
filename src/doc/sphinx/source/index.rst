@@ -24,6 +24,11 @@ network potentials with the provided training tools.
 Documentation
 =============
 
+.. danger::
+
+   The build process has changed recently, please have a look at the compilation
+   chapter below!
+
 .. warning::
 
    Unfortunately many parts of the documentation are still unfinished and will
@@ -101,147 +106,6 @@ Additional, though not strictly required tools, are also quite useful:
 
 Rough guidelines for NNP training are provided [here](training.md).
 
-
-Build process
-=============
-
-Code structure
---------------
-
-This package contains multiple components with varying interdependencies and
-dependencies on third-party libraries. You may not need to build all
-components, this depends on the intended use. The following table lists all
-components and their respective requirements (follow the links for more
-information).
-
-+---------------------------------+----------------------------+------------------------------------------------------+
-| Component                       | Requirements               | Function                                             |
-+=================================+============================+======================================================+
-| :ref:`libnnp <libnnp>`          | C++98 compiler (icpc, g++) | NNP core library (NN, SF, Structure, ...)            |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| libnnpif                        | libnnp, MPI                | Interfaces to other software (LAMMPS, ...)           |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| libnnptrain                     | libnnp, MPI, GSL, Eigen    | Dataset and training routines (Kalman, ...).         |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| :ref:`nnp-convert`              | libnnp                     | Convert between structure file formats.              |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| nnp-cutoff                      | libnnp                     | Test speed of different cutoff functions.            |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| nnp-dist                        | libnnp                     | Calculate radial and angular distribution functions. |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| :ref:`nnp-predict`              | libnnp                     | Predict energy and forces for one structure.         |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| :ref:`nnp-prune`                | libnnp                     | Prune symmetry functions.                            |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| :ref:`nnp-select`               | libnnp                     | Select subset from data set.                         |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| nnp-symfunc                     | libnnp                     | Symmetry function shape from settings file.          |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| nnp-comp2                       | libnnptrain                | Compare prediction of 2 NNPs for data set.           |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| nnp-dataset                     | libnnptrain                | Calculate energies and forces for a whole data set.  |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| :ref:`nnp-norm`                 | libnnptrain                | Calculate normalization factors for data set.        |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| :ref:`nnp-scaling`              | libnnptrain                | Calculate symmetry function values for data set.     |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| nnp-train                       | libnnptrain                | Train a neural network potential.                    |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| pair_style nnp                  | libnnpif                   | Pair style `nnp` for LAMMPS                          |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| pynnp                           | libnnp, python, cython     | Python interface to NNP library.                     |
-+---------------------------------+----------------------------+------------------------------------------------------+
-| doc                             | Sphinx, Doxygen, Exhale    | Documentation.                                       |
-+---------------------------------+----------------------------+------------------------------------------------------+
-
-The simple way using the master makefile
-----------------------------------------
-
-A master makefile is provided in the ``src`` directory which provides targets for
-all individual components (except for the LAMMPS :ref:`pair_style  nnp <if_lammps>`).
-For instance, compiling the interface library ``libnnpif`` requires only to type
-
-.. code-block:: bash
-
-   cd src
-   make libnnpif-shared
-
-This will automatically build a shared version (for dynamic linking) of the
-required library ``libnnp`` and the requested ``libnnpif``.  Similarly, a static
-build is done like this:
-
-.. code-block:: bash
-
-   make libnnpif-static
-
-To build everything (all libraries and tools) type:
-
-.. code-block:: bash
-
-   make shared
-
-or
-
-.. code-block:: bash
-
-   make static
-
-Compiled binaries will be copied to the ``bin`` path (relative to the root
-directory), whereas libraries can be found in the ``lib`` folder.  To clean up
-individual components or everything use one of these makefile targets
-
-.. code-block:: bash
-
-   make clean
-   make clean-doc
-   make clean-libnnpif
-
-Have a look at the main makefile in ``src`` for all available build
-targets.
-
-Currently the build process has been tested with two different compilers, the
-GNU compiler g++ 5.4 (``gnu``) and the Intel compiler 17 (``intel``). It is
-possible to switch between them via the ``COMP`` variable, e.g.
-
-.. code-block:: bash
-
-   make libnnp COMP=intel
-
-If you need to change compiler variables and paths have a look at the
-corresponding makefiles containing global build parameters:
-
-.. code-block:: bash
-
-   src/makefile.gnu
-   src/makefile.intel
-
-You can also create new parameter makefiles based on the above and change the
-file name suffix according to your target:
-
-.. code-block:: bash
-
-   src/makefile.target
-   make libnnp COMP=target
-
-By default the makefile will use 4 processors for compiling multiple files at
-once, this behaviour can be overriden with the CORES switch, e.g. to use 8
-cores:
-
-.. code-block:: bash
-
-   make libnnp CORES=-j8
-
-.. warning::
-
-   Do not use the `-j` switch for the master makefile, this may mess up
-   the compilation order.
-
-Individual component makefiles
-------------------------------
-
-It is also possible to invoke individual makefiles for each component manually.
-Just switch to the corresponding folder and use ``make shared`` or ``make static``.
-
 Examples
 ========
 
@@ -265,7 +129,9 @@ Actual full size data sets may be rather large and are therefore hosted elsewher
 +-------------+--------------+
 | System      | Link         |
 +=============+==============+
-| |Cu2S| [1]_ | |cu2s_data|_ |
+| |H2O| [1]_  | |h2o_data|_  |
++-------------+--------------+
+| |Cu2S| [2]_ | |cu2s_data|_ |
 +-------------+--------------+
 
 NNP potentials ready for use
@@ -291,6 +157,7 @@ list of keywords is provided :ref:`here <keywords>`.
    :hidden:
    :caption: Topics
 
+   Topics/build
    Topics/descriptors
    Topics/keywords
    Topics/cfg_file
@@ -325,12 +192,20 @@ list of keywords is provided :ref:`here <keywords>`.
    About/license
    About/changelog
 
+.. |H2O| replace:: H\ :sub:`2`\ O
+
 .. |Cu2S| replace:: Cu\ :sub:`2`\ S
+
+.. |h2o_data| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2634098.svg
+.. _h2o_data: https://doi.org/10.5281/zenodo.2634098
 
 .. |cu2s_data| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2603918.svg
 .. _cu2s_data: https://doi.org/10.5281/zenodo.2603918
 
-.. [1] Singraber, A.; Morawietz, T.; Behler, J.; Dellago, C. Parallel
-   Multi-Stream Training of High-Dimensional Neural Network Potentials. *Submitted
-   to J. Chem. Theory Comput.* 2019.
+.. [1] Morawietz, T.; Singraber, A.; Dellago, C.; Behler, J. How van Der Waals
+   Interactions Determine the Unique Properties of Water. Proc. Natl. Acad. Sci.
+   U. S. A. 2016, 113 (30), 8368–8373. `https://doi.org/10.1073/pnas.1602375113. <https://doi.org/10.1073/pnas.1602375113>`__
 
+.. [2] Singraber, A.; Morawietz, T.; Behler, J.; Dellago, C. Parallel
+   Multistream Training of High-Dimensional Neural Network Potentials. J. Chem.
+   Theory Comput. 2019, 15 (5), 3075–3092. `https://doi.org/10.1021/acs.jctc.8b01092. <https://doi.org/10.1021/acs.jctc.8b01092>`__
