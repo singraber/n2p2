@@ -247,7 +247,11 @@ void Atom::clearNeighborList(size_t const numElements)
 {
     free(true);
     numNeighbors = 0;
+    numNeighborsPerElement.clear();
     numNeighborsPerElement.resize(numElements, 0);
+#ifndef NOELEMENTNL
+    neighborsPerElement.resize(numElements);
+#endif
     numNeighborsUnique = 0;
     neighborsUnique.clear();
     vector<size_t>(neighborsUnique).swap(neighborsUnique);
@@ -298,6 +302,7 @@ vector<string> Atom::getForcesLines() const
     return v;
 }
 
+// TODO: Add neighborsPerElement list.
 vector<string> Atom::info() const
 {
     vector<string> v;

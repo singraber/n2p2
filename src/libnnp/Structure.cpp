@@ -76,6 +76,9 @@ void Structure::addAtom(Atom const& atom, string const& element)
     atoms.back().indexStructure       = index;
     atoms.back().element              = elementMap[element];
     atoms.back().numSymmetryFunctions = 0;
+#ifndef NOELEMENTNL
+    atoms.back().neighborsPerElement.resize(elementMap.size());
+#endif
     numAtoms++;
     numAtomsPerElement[elementMap[element]]++;
 
@@ -196,6 +199,9 @@ void Structure::readFromLines(vector<string> const& lines)
             atoms.back().numNeighborsPerElement.resize(numElements, 0);
             numAtoms++;
             numAtomsPerElement[elementMap[splitLine.at(4)]]++;
+#ifndef NOELEMENTNL
+            atoms.back().neighborsPerElement.resize(numElements);
+#endif
         }
         else if (splitLine.at(0) == "energy")
         {
@@ -298,6 +304,11 @@ void Structure::calculateNeighborList(double cutoffRadius)
                                         atoms[i].neighborsUnique.push_back(j);
                                         atoms[i].numNeighborsUnique++;
                                     }
+#ifndef NOELEMENTNL
+                                    atoms[i].neighborsPerElement.at(
+                                        atoms[j].element).push_back(
+                                            atoms[i].neighbors.size() - 1);
+#endif
                                 }
                             }
                         }
@@ -338,6 +349,10 @@ void Structure::calculateNeighborList(double cutoffRadius)
                         atoms[i].numNeighbors++;
                         atoms[i].neighborsUnique.push_back(j);
                         atoms[i].numNeighborsUnique++;
+#ifndef NOELEMENTNL
+                        atoms[i].neighborsPerElement.at(atoms[j].element).
+                            push_back(atoms[i].neighbors.size() - 1);
+#endif
                     }
                 }
             }

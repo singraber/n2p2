@@ -282,6 +282,10 @@ void InterfaceLammps::setLocalAtoms(int              numAtomsLocal,
         a.neighbors.clear();
         a.numNeighborsPerElement.clear();
         a.numNeighborsPerElement.resize(numElements, 0);
+#ifndef NOELEMENTNL
+        a.neighborsPerElement.clear();
+        a.neighborsPerElement.resize(numElements);
+#endif
         structure.numAtomsPerElement[a.element]++;
     }
 
@@ -318,6 +322,9 @@ void InterfaceLammps::addNeighbor(int    i,
         n.dr[2] *= convLength;
         n.d     *= convLength;
     }
+#ifndef NOELEMENTNL
+    a.neighborsPerElement[n.element].push_back(a.neighbors.size() - 1);
+#endif
 
     return;
 }
