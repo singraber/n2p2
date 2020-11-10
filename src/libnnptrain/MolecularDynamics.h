@@ -21,6 +21,7 @@
 #include <cstddef> // std::size_t
 #include <string>  // std::string
 #include <vector>  // std::vector
+#include <random>  // std::default_random_engine & std::normal_distribution
 
 namespace nnp
 {
@@ -34,8 +35,10 @@ public:
     {
         /// Verlet algorithm.
         DT_VERLET,
-        /// Velocity-Verlet algorithm.
-        DT_VELOCITYVERLET
+        /// Velocity Verlet algorithm.
+        DT_VELOCITYVERLET,
+        /// Langevin VRORV algorithm.
+        DT_LANGEVIN
     };
 
     /** %MolecularDynamics class constructor.
@@ -88,6 +91,24 @@ public:
      */
     void                     setParametersVerlet(double const dt,
                                                  double const m);
+    /** Set parameters for Velocity Verlet algorithm.
+     *
+     * @param[in] dt Time step size for Velocity Verlet algorithm.
+     * @param[in] m Mass of artificial weight particles.
+     */
+    void                     setParametersVelocityVerlet(double const dt,
+                                                         double const m);
+    /** Set parameters for Langevin VRORV algorithm.
+     *
+     * @param[in] dt Time step size for Langevin VRORV algorithm.
+     * @param[in] m Mass of artificial weight particles.
+     * @param[in] gamma Collision rate of particles with heat bath.
+     * @param[in] T Temperature of heat bath.
+     */
+    void                     setParametersLangevin(double const dt,
+                                                   double const m,
+                                                   double const gamma,
+                                                   double const T);
 
     /** Status report.
      *
@@ -116,12 +137,26 @@ private:
     double              dt;
     /// Mass.
     double              m;
+    /// Collision rate.
+    double              gamma;
+    /// Temperature of heat bath.
+    double              T;
+    /// Constant for velocity in O-step.
+    double              a1;
+    /// Constant for random number in O-step.
+    double              b1;
     /// Pointer to previous state.
     std::vector<double> state_prev;
     /// State vector pointer.
     double*             state;
     /// Dummy for caching actual state.
     double              state_dummy;
+    /// Velocity vector.
+    std::vector<double> velo;
+    /// Random number generator.
+    std::default_random_engine generator;
+    /// Standard normal distribution.
+    std::normal_distribution<double> distribution;
     /// Error pointer (single double value).
     double const*       error;
     /// Gradient vector pointer.

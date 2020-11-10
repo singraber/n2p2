@@ -18,6 +18,7 @@
 #include "utility.h"
 #include <cstddef>
 #include <cmath>
+#include <random>
 
 using namespace std;
 using namespace nnp;
@@ -29,11 +30,13 @@ MolecularDynamics::MolecularDynamics(size_t const       sizeState,
     type    (type),
     dt      (0.0        ),
     m       (0.0        ),
+    gamma   (0.0        ),
+    T       (0.0        ),
     state   (NULL       ),
     error   (NULL       ),
     gradient(NULL       )
 {
-    if (type != DT_VERLET)
+    if (type != DT_VERLET && type != DT_VELOCITYVERLET && type != DT_LANGEVIN)
     {
         throw runtime_error("ERROR: Unknown MolecularDynamics type.\n");
     }
@@ -47,13 +50,24 @@ MolecularDynamics::MolecularDynamics(size_t const       sizeState,
     {
         state_prev.resize(sizeState, 0.0);
     }
+    else if (type == DT_VELOCITYVERLET)
+    {
+        state_prev.resize(sizeState, 0.0);
+        velo.resize(sizeState, 0.0);
+    }
+    else if (type == DT_LANGEVIN)
+    {
+        velo.resize(sizeState, 0.0);
+
+        std::normal_distribution<double> distribution(0.0, 1.0);
+    }
 }
 
 void MolecularDynamics::setState(double* state)
 {
     this->state = state;
 
-    if (n == 0)
+    if (n == 0 && type == DT_VERLET)
     {
         for(size_t i = 0; i < sizeState; ++i)
         {
@@ -101,6 +115,60 @@ void MolecularDynamics::update()
             state_prev[i] = state_dummy;
         }
     }
+    else if (type == DT_VELOCITYVERLET)
+    {
+        // Update positions at even n
+        if (n % 2 == 0)
+        {
+            for (std::size_t i = 0; i < sizeState; ++i)
+            {
+                // Velocity Verlet: generating new state at (t + dt)
+                state[i] = state[i] + velo[i] * dt + gradient[i] * 0.5 * dt * dt / m;
+
+                // Cache the gradient of the force at t
+                state_prev[i] = gradient[i];
+            }
+        }
+        // Update velocities at odd n
+        else
+        {
+            for (std::size_t i = 0; i < sizeState; ++i)
+            {
+                // Velocity Verlet: generating new velocity at (t + dt)
+                velo[i] = velo[i] + (state_prev[i] + gradient[i]) * 0.5 * dt / m;
+            }
+        }
+    }
+    else if (type == DT_LANGEVIN)
+    {
+        // Calculate first steps VROR at even n
+        if (n % 2 == 0)
+        {
+            for (std::size_t i = 0; i < sizeState; ++i)
+            {
+                // Langevin V-step: generate intermediate velocity at (t + 1/4 * dt)
+                velo[i] = velo[i] - gradient[i] * 0.5 * dt / m;
+
+                // Langevin R-step: generate intermediate state at (t + 1/2 * dt)
+                state[i] = state[i] + velo[i] * 0.5 * dt;
+
+                // Langevin O-step: generate intermediate velocity at (t + 3/4 * dt)
+                velo[i] = velo[i] * a1 + distribution(generator) * b1;
+
+                // Langevin R-step: generate new state at (t + dt)
+                state[i] = state[i] + velo[i] * 0.5 * dt;
+            }
+        }
+        // Calculate last step V at odd n
+        else
+        {
+            for (std::size_t i = 0; i < sizeState; ++i)
+            {
+                // Langevin V-step: generate new velocity at (t + dt)
+                velo[i] = velo[i] - gradient[i] * 0.5 * dt / m;
+            }
+        }
+    }
 
     ++n;
 
@@ -111,6 +179,28 @@ void MolecularDynamics::setParametersVerlet(double const dt, double const m)
 {
     this->dt = dt;
     this->m = m;
+
+    return;
+}
+
+void MolecularDynamics::setParametersVelocityVerlet(double const dt, double const m)
+{
+    this->dt = dt;
+    this->m = m;
+
+    return;
+}
+
+void MolecularDynamics::setParametersLangevin(double const dt, double const m,
+                                              double const gamma, double const T)
+{
+    this->dt = dt;
+    this->m = m;
+    this->gamma = gamma;
+    this->T = T;
+
+    a1 = exp(-gamma * dt);
+    b1 = sqrt((1.0 - a1 * a1) * 1.380649E-23 * T / m);
 
     return;
 }
@@ -158,6 +248,22 @@ vector<string> MolecularDynamics::info() const
         v.push_back(strpr("sizeState       = %zu\n", sizeState));
         v.push_back(strpr("dt              = %12.4E\n", dt));
         v.push_back(strpr("m               = %12.4E\n", m));
+    }
+    else if (type == DT_VELOCITYVERLET)
+    {
+        v.push_back(strpr("MolecularDynamicsType::DT_VELOCITYVERLET (%d)\n", type));
+        v.push_back(strpr("sizeState       = %zu\n", sizeState));
+        v.push_back(strpr("dt              = %12.4E\n", dt));
+        v.push_back(strpr("m               = %12.4E\n", m));
+    }
+    else if (type == DT_LANGEVIN)
+    {
+        v.push_back(strpr("MolecularDynamicsType::DT_LANGEVIN (%d)\n", type));
+        v.push_back(strpr("sizeState       = %zu\n", sizeState));
+        v.push_back(strpr("dt              = %12.4E\n", dt));
+        v.push_back(strpr("m               = %12.4E\n", m));
+        v.push_back(strpr("gamma           = %12.4E\n", gamma));
+        v.push_back(strpr("T               = %12.4E\n", T));
     }
 
     return v;

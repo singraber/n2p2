@@ -102,9 +102,11 @@ kalman_etamax                   1.0            # Standard Kalman filter paramete
 # MOLECULAR DYNAMICS #
 ######################
 # This section is only used if "updater_type" is "3".
-dynamics_type                   0              # Molecular Dynamics type (0 = Standard)
-dynamics_dt                     0.0001         # Time step size for Verlet algorithm
-dynamics_m                      1.0            # Mass for artificial weight particles
+dynamics_type                   0              # Molecular Dynamics type (0 = Verlet, 1 = Velocity Verlet, 2 = Langevin VRORV splitting).
+dynamics_dt                     0.0001         # Time step size for Verlet algorithm.
+dynamics_m                      1.0            # Mass for artificial weight particles.
+dynamics_gamma                  1000.0         # Collision rate of weight particles with heat bath (inverse seconds).
+dynamics_T                      3000.0         # Temperature of the heat bath (Kelvins).
 
 ###############################################################################
 # SYMMETRY FUNCTIONS

@@ -1124,8 +1124,29 @@ void Training::setupTraining()
         }
         else if (dynamicsType == MolecularDynamics::DT_VELOCITYVERLET)
         {
-            throw runtime_error("ERROR: Velocity-Verlet algorithm not yet"
-                                " implemented.\n");
+            double const dt = atof((settings["dynamics_dt"].c_str()));
+            double const m  = atof((settings["dynamics_m"].c_str()));
+
+            for (size_t i = 0; i < updaters.size(); ++i)
+            {
+                MolecularDynamics* u 
+                    = dynamic_cast<MolecularDynamics*>(updaters.at(i));
+                u->setParametersVelocityVerlet(dt, m);
+            }
+        }
+        else if (dynamicsType == MolecularDynamics::DT_LANGEVIN)
+        {
+            double const dt    = atof((settings["dynamics_dt"].c_str()));
+            double const m     = atof((settings["dynamics_m"].c_str()));
+            double const gamma = atof((settings["dynamics_gamma"].c_str()));
+            double const T     = atof((settings["dynamics_T"].c_str()));
+
+            for (size_t i = 0; i < updaters.size(); ++i)
+            {
+                MolecularDynamics* u 
+                    = dynamic_cast<MolecularDynamics*>(updaters.at(i));
+                u->setParametersLangevin(dt, m, gamma, T);
+            }
         }
     }
 
