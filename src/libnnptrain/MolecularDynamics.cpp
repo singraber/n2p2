@@ -200,7 +200,8 @@ void MolecularDynamics::setParametersLangevin(double const dt, double const m,
     this->T = T;
 
     a1 = exp(-gamma * dt);
-    b1 = sqrt((1.0 - a1 * a1) * 1.380649E-23 * T / m);
+    b1 = sqrt((1.0 - a1 * a1) * T / m);
+    //b1 = sqrt((1.0 - a1 * a1) * 1.380649E-23 * T / m);
 
     return;
 }

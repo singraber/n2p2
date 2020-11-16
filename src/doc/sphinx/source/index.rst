@@ -26,8 +26,8 @@ Documentation
 
 .. danger::
 
-   The build process has changed recently, please have a look at the compilation
-   chapter below!
+   The build process has changed recently, please have a look at the :ref:`build
+   instructions <build>`!
 
 .. warning::
 
@@ -37,21 +37,31 @@ Documentation
    quickly as possible.
 
 This package uses automatic documentation generation via `Doxygen
-<http://www.doxygen.nl>`__, `Sphinx <http://www.sphinx-doc.org>`__
-and `Exhale <https://github.com/svenevs/exhale>`__. An online version of the
-documentation which is automatically updated with the main repository can be
-found `here <https://compphysvienna.github.io/n2p2>`__.
+<http://www.doxygen.nl>`__ and `Sphinx <http://www.sphinx-doc.org>`__. An online
+version of the documentation which is automatically updated with the main
+repository can be found `here <https://compphysvienna.github.io/n2p2>`__.
+
+.. This package uses automatic documentation generation via `Doxygen
+.. <http://www.doxygen.nl>`__, `Sphinx <http://www.sphinx-doc.org>`__
+.. and `Exhale <https://github.com/svenevs/exhale>`__. An online version of the
+.. documentation which is automatically updated with the main repository can be
+.. found `here <https://compphysvienna.github.io/n2p2>`__.
 
 API documentation
 -----------------
 
 Most parts of the C++ code are documented in the header files via Doxygen
 annotations. The information written in the source files is automatically
-extracted by `Exhale` (which uses `Doxygen`) and integrated into this
-documentation (see `API` section on the left). However, because
-this documentation and also `Exhale` is still under development some things may
-not work as expected. As a fallback option the unaltered Doxygen API
-documentation is also available `here <doxygen/index.html>`__.
+extracted by `Doxygen` and presented in a separate API documentation page
+available `here <doxygen/index.html>`__.
+
+.. Most parts of the C++ code are documented in the header files via Doxygen
+.. annotations. The information written in the source files is automatically
+.. extracted by `Exhale` (which uses `Doxygen`) and integrated into this
+.. documentation (see `API` section on the left). However, because
+.. this documentation and also `Exhale` is still under development some things may
+.. not work as expected. As a fallback option the unaltered Doxygen API
+.. documentation is also available `here <doxygen/index.html>`__.
 
 Purpose
 =======
@@ -76,12 +86,12 @@ Molecular dynamics simulation
 -----------------------------
 
 Similarly, if you have a working neural network potential setup and would like
-to run an MD simulation with an external MD software (so far only LAMMPS is
-supported), these components are required:
+to run an MD simulation with an external MD software (LAMMPS or CabanaMD), these
+components are required:
 
 * :ref:`libnnp <libnnp>`
 * `libnnpif`
-* :ref:`pair_style nnp <if_lammps>`
+* :ref:`lammps-nnp <if_lammps>` (for LAMMPS)
 
 Training a new neural network potential
 ---------------------------------------
@@ -91,7 +101,7 @@ To train a completely new neural network potential the following parts are requi
 * :ref:`libnnp <libnnp>`
 * `libnnptrain`
 * :ref:`nnp-scaling`
-* `nnp-train`
+* :ref:`nnp-train`
 
 Additional, though not strictly required tools, are also quite useful:
 
@@ -161,10 +171,16 @@ list of keywords is provided :ref:`here <keywords>`.
    Topics/descriptors
    Topics/keywords
    Topics/cfg_file
-   Topics/if_lammps
-   Topics/pair_nnp
    Topics/training
    Topics/units
+
+.. toctree::
+   :hidden:
+   :caption: Interfaces
+
+   Interfaces/if_lammps
+   Interfaces/pair_nnp
+   Interfaces/if_cabanamd
 
 .. toctree::
    :hidden:
@@ -177,12 +193,13 @@ list of keywords is provided :ref:`here <keywords>`.
    Tools/nnp-prune
    Tools/nnp-select
    Tools/nnp-scaling
+   Tools/nnp-train
 
-.. toctree::
-   :hidden:
-   :caption: API
-
-   doc-exhale/root
+.. .. toctree::
+..    :hidden:
+..    :caption: API
+.. 
+..    doc-exhale/root
 
 .. toctree::
    :hidden:
@@ -204,8 +221,8 @@ list of keywords is provided :ref:`here <keywords>`.
 
 .. [1] Morawietz, T.; Singraber, A.; Dellago, C.; Behler, J. How van Der Waals
    Interactions Determine the Unique Properties of Water. Proc. Natl. Acad. Sci.
-   U. S. A. 2016, 113 (30), 8368–8373. `https://doi.org/10.1073/pnas.1602375113. <https://doi.org/10.1073/pnas.1602375113>`__
+   U. S. A. 2016, 113 (30), 8368–8373. https://doi.org/10.1073/pnas.1602375113
 
 .. [2] Singraber, A.; Morawietz, T.; Behler, J.; Dellago, C. Parallel
    Multistream Training of High-Dimensional Neural Network Potentials. J. Chem.
-   Theory Comput. 2019, 15 (5), 3075–3092. `https://doi.org/10.1021/acs.jctc.8b01092. <https://doi.org/10.1021/acs.jctc.8b01092>`__
+   Theory Comput. 2019, 15 (5), 3075–3092. https://doi.org/10.1021/acs.jctc.8b01092

@@ -40,6 +40,7 @@ map<string, string> const createKnownKeywordsMap()
     m["global_hidden_layers_short"    ] = "";
     m["global_nodes_short"            ] = "";
     m["global_activation_short"       ] = "";
+    m["element_nodes_short"           ] = "";
     m["normalize_nodes"               ] = "";
     m["mean_energy"                   ] = "";
     m["conv_length"                   ] = "";
@@ -60,6 +61,7 @@ map<string, string> const createKnownKeywordsMap()
     m["weights_max"                   ] = "";
     m["nguyen_widrow_weights_short"   ] = "";
     m["precondition_weights"          ] = "";
+    m["main_error_metric"             ] = "";
     m["write_trainpoints"             ] = "";
     m["write_trainforces"             ] = "";
     m["write_weights_epoch"           ] = "";
@@ -94,6 +96,8 @@ map<string, string> const createKnownKeywordsMap()
     m["dynamics_type"                 ] = "";
     m["dynamics_dt"                   ] = "";
     m["dynamics_m"                    ] = "";
+    m["dynamics_gamma"                ] = "";
+    m["dynamics_T"                    ] = "";
 
     return m;
 }
@@ -280,7 +284,8 @@ size_t Settings::sanityCheck()
     {
         if (contents.count((*it).first) > 1
             && (*it).first != "symfunction_short"
-            && (*it).first != "atom_energy")
+            && (*it).first != "atom_energy"
+            && (*it).first != "element_nodes_short")
         {
             countProblems++;
             log.push_back(strpr(

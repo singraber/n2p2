@@ -38,7 +38,7 @@ random_seed                     1234567        # Random number generator seed.
 # ADDITIONAL SETTINGS FOR TRAINING
 ###############################################################################
 # These keywords are solely used for training with nnp-train.
-epochs                          20             # Number of training epochs.
+epochs                          2000           # Number of training epochs.
 updater_type                    3              # Weight update method (0 = Gradient Descent, 1 = Kalman filter, 3 = Molecular Dynamics).
 parallel_mode                   0              # Training parallelization used (0 = Parallel (rank 0 update), 1 = Parallel (all update)).
 jacobian_mode                   0              # Jacobian computation mode (0 = Summation to single gradient, 1 = Per-task summed gradient, 2 = Full Jacobian).
@@ -59,10 +59,11 @@ weights_min                     -1.0           # Minimum value for initial rando
 weights_max                     1.0            # Maximum value for initial random weights.
 #precondition_weights                           # Precondition weights with initial energies.
 #nguyen_widrow_weights_short                    # Initialize neural network weights according to Nguyen-Widrow scheme.
-write_trainpoints               1              # Write energy comparison every this many epochs.
+main_error_metric               RMSEpa         # Main error metric for screen output (RMSEpa/RMSE/MAEpa/MAE).
+write_trainpoints               100            # Write energy comparison every this many epochs.
 #write_trainforces               1              # Write force comparison every this many epochs.
-#write_weights_epoch             1              # Write weights every this many epochs.
-#write_neuronstats               1              # Write neuron statistics every this many epochs.
+write_weights_epoch             100            # Write weights every this many epochs.
+write_neuronstats               100            # Write neuron statistics every this many epochs.
 write_trainlog                                 # Write training log file.
 ####################
 # GRADIENT DESCENT #
@@ -102,11 +103,12 @@ kalman_etamax                   1.0            # Standard Kalman filter paramete
 # MOLECULAR DYNAMICS #
 ######################
 # This section is only used if "updater_type" is "3".
-dynamics_type                   0              # Molecular Dynamics type (0 = Verlet, 1 = Velocity Verlet, 2 = Langevin VRORV splitting).
-dynamics_dt                     0.0001         # Time step size for Verlet algorithm.
+dynamics_type                   2              # Molecular Dynamics type (0 = Verlet, 1 = Velocity Verlet, 2 = Langevin VRORV splitting).
+dynamics_dt                     0.00005        # Time step size for Verlet algorithm.
 dynamics_m                      1.0            # Mass for artificial weight particles.
+#dynamics_gamma                  0.0            # Collision rate of weight particles with heat bath (inverse seconds).
 dynamics_gamma                  1000.0         # Collision rate of weight particles with heat bath (inverse seconds).
-dynamics_T                      3000.0         # Temperature of the heat bath (Kelvins).
+dynamics_T                      0.0            # Temperature of the heat bath (Kelvins).
 
 ###############################################################################
 # SYMMETRY FUNCTIONS
