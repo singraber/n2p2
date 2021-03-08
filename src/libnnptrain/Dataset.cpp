@@ -115,17 +115,28 @@ void Dataset::setupRandomNumberGenerator()
     log << "\n";
 
     // Get random seed from settings file.
-    unsigned long seed = atoi(settings["random_seed"].c_str());
-    unsigned long seedGlobal = 0;
+    unsigned long seedGlobal = atoi(settings["random_seed"].c_str());
 
+    // Rank 0 broadcasts global seed.
     if (myRank == 0)
     {
-        log << strpr("Random number generator seed: %d\n", seed);
-        if (seed == 0)
+        log << strpr("Random number generator seed: %d\n", seedGlobal);
+        if (seedGlobal == 0)
         {
             log << "WARNING: Seed set to 0. This is a special value for the "
                    "gsl_rng_set() routine (see GSL docs).\n";
         }
+    }
+    MPI_Bcast(&seedGlobal, 1, MPI_UNSIGNED_LONG, 0, comm);
+    log << strpr("Seed for global RNG: %lu\n", seedGlobal);
+    // All processes initialize global RNG.
+    rngGlobal = gsl_rng_alloc(gsl_rng_taus);
+    gsl_rng_set(rngGlobal, seedGlobal);
+    // Get new initial seed for per-processor RNGs from global RNG.
+    unsigned long seed = gsl_rng_get(rngGlobal);
+
+    if (myRank == 0)
+    {
         // Initialize personal RNG of process 0 with the given seed.
         rng = gsl_rng_alloc(gsl_rng_mt19937);
         gsl_rng_set(rng, seed);
@@ -149,12 +160,6 @@ void Dataset::setupRandomNumberGenerator()
         rng = gsl_rng_alloc(gsl_rng_taus);
         gsl_rng_set(rng, seed);
     }
-    // Rank 0 broadcasts global seed.
-    MPI_Bcast(&seedGlobal, 1, MPI_UNSIGNED_LONG, 0, comm);
-    log << strpr("Seed for global RNG: %lu\n", seedGlobal);
-    // All processes initialize global RNG.
-    rngGlobal = gsl_rng_alloc(gsl_rng_taus);
-    gsl_rng_set(rngGlobal, seedGlobal);
 
     log << "*****************************************"
            "**************************************\n";

@@ -23,18 +23,18 @@ void BoostDataContainer<Example_nnp_train>::setup()
     examples.push_back(Example_nnp_train("LJ"));
     e = &(examples.back());
     e->lastEpoch = 10;
-    e->rmseEnergyTrain = 1.70594742E-03;
-    e->rmseEnergyTest  = 1.22642208E-03;
-    e->rmseForcesTrain = 3.77302629E-02;
-    e->rmseForcesTest  = 2.25135617E-01;
+    e->rmseEnergyTrain = 6.52345439E-04;
+    e->rmseEnergyTest  = 7.11819625E-04;
+    e->rmseForcesTrain = 2.09901211E-02;
+    e->rmseForcesTest  = 1.57340602E-02;
 
     //examples.push_back(Example_nnp_train("H2O_RPBE-D3"));
     //e = &(examples.back());
     //e->lastEpoch = 10;
-    //e->rmseEnergyTrain = 1.02312914E-04;
-    //e->rmseEnergyTest  = 5.28837597E-04;
-    //e->rmseForcesTrain = 1.67069652E-02;
-    //e->rmseForcesTest  = 1.07708383E-02;
+    //e->rmseEnergyTrain = 1.76506540E-04;
+    //e->rmseEnergyTest  = 3.22755877E-04;
+    //e->rmseForcesTrain = 1.24590860E-02;
+    //e->rmseForcesTest  = 8.59577651E-03;
 
     return;
 }
