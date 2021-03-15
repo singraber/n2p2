@@ -29,6 +29,16 @@
 #include <stdexcept> // std::runtime_error
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_rng.h>
+#ifdef _WIN32
+    #ifndef NOMINMAX
+    #define NOMINMAX
+    #endif
+    #include <windows.h>
+#else
+    #include <time.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+#endif
 
 using namespace std;
 using namespace nnp;
@@ -114,8 +124,7 @@ void Dataset::setupRandomNumberGenerator()
            "**************************************\n";
     log << "\n";
 
-    // Get random seed from settings file.
-    unsigned long seed = atoi(settings["random_seed"].c_str());
+    unsigned long seed = setupSeed();
     unsigned long seedGlobal = 0;
 
     if (myRank == 0)
@@ -882,6 +891,43 @@ int Dataset::distributeStructures(bool          randomize,
 
     return bytesTransferred;
 }
+
+#ifdef _WIN32
+
+  unsigned long Dataset::generateSeed()
+  {
+    if ((settings["random_seed"] == "time") || (settings["random_seed"] == "TIME"))
+    {
+        unsigned long seed = generateSeed();
+        FILETIME       t;
+        ULARGE_INTEGER i;
+        GetSystemTimeAsFileTime( &t );
+        i.u.LowPart  = t.dwLowDateTime;
+        i.u.HighPart = t.dwHighDateTime;
+
+        return i.QuadPart / 1000;
+    }
+    else
+        return atoi(settings["random_seed"].c_str());
+  }
+
+#else // POSIX, presumably
+
+  unsigned long Dataset::setupSeed()
+  {
+    if ((settings["random_seed"] == "time") || (settings["random_seed"] == "TIME"))
+    {
+        struct timespec t, r;
+        clock_getres ( CLOCK_REALTIME, &r );
+        clock_gettime( CLOCK_REALTIME, &t );
+
+        return t.tv_nsec / r.tv_nsec;
+    }
+    else
+        return atoi(settings["random_seed"].c_str());
+  }
+
+#endif 
 
 void Dataset::toNormalizedUnits()
 {
