@@ -96,12 +96,7 @@ public:
     int         distributeStructures(bool               randomize,
                                      bool               excludeRank0 = false,
                                      std::string const& fileName
-                                         = "input.data");
-    /** Generate platform-specific random seed from current time.
-     *
-     * @return Random seed from time.
-     */
-    unsigned long setupSeed();                                         
+                                         = "input.data");                                      
     /** Switch all structures to normalized units.
      */
     void        toNormalizedUnits();

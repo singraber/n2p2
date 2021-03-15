@@ -169,6 +169,13 @@ bool                     comparePointerTargets(T* lhs, T* rhs)
  */
 double                   pow_int(double x, int n);
 
+/** Give seed from input or generate seed from time".
+ *
+ * @param[in] x String with input seed or "time" keyword.
+ * 
+ * @return Seed
+ */
+unsigned long setupSeed(const char* inputSeed);
 }
-
+ 
 #endif

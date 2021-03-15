@@ -34,8 +34,7 @@ int main(int argc, char* argv[])
              << "       Arguments for mode \"random\":\n"
              << "         <arg1> ... Ratio of selected structures "
              << "(1.0 equals 100 %).\n"
-             << "         <arg2> ... Seed for random number generator "
-             << "(integer).\n"
+             << "         <arg2> ... Seed for random number generator (integer). Default from time. \n"
              << "       Arguments for mode \"interval\":\n"
              << "         <arg1> ... Select structures in this interval "
              << "(integer).\n"
@@ -49,7 +48,6 @@ int main(int argc, char* argv[])
     size_t countStructures = 0;
     size_t countSelected = 0;
     size_t interval = 10;
-    int seed = 10;
     double ratio = 1.0;
 
     Log log;
@@ -69,12 +67,17 @@ int main(int argc, char* argv[])
     if (strcmp(argv[1], "random") == 0)
     {
         mode = false;
-        if (argc != 4)
+        if (argc < 3)
         {
             throw invalid_argument("ERROR: Wrong number of arguments.\n");
         }
         ratio = atof(argv[2]);
-        seed = atoi(argv[3]);
+        const char *inputSeed;
+        if (argv[3])
+            inputSeed = argv[3];
+        else
+            inputSeed = "time";
+        unsigned long seed = setupSeed(inputSeed);
         srand(seed);
         log << strpr("Selecting randomly %.2f %% of all structures.\n",
                      ratio * 100.0);

@@ -22,6 +22,16 @@
 #include <limits>    // std::numeric_limits
 #include <sstream>   // std::istringstream
 #include <stdexcept> // std::runtime_error
+#ifdef _WIN32
+    #ifndef NOMINMAX
+    #define NOMINMAX
+    #endif
+    #include <windows.h>
+#else
+    #include <time.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+#endif
 
 #define STRPR_MAXBUF 1024
 
@@ -308,5 +318,43 @@ double pow_int(double x, int n)
 
     return result;
 }
+
+#ifdef _WIN32
+
+  unsigned long setupSeed(const char* inputSeed)
+  {
+    if ((inputSeed == "time") || (inputSeed == "TIME"))
+    {
+        unsigned long seed = generateSeed();
+        FILETIME       t;
+        ULARGE_INTEGER i;
+        GetSystemTimeAsFileTime( &t );
+        i.u.LowPart  = t.dwLowDateTime;
+        i.u.HighPart = t.dwHighDateTime;
+
+        return i.QuadPart / 1000;
+    }
+    else
+        return atoi(inputSeed);
+  }
+
+#else // POSIX, presumably
+
+  unsigned long setupSeed(const char* inputSeed)
+  {
+    unsigned long seed = atoi(inputSeed);
+    if (seed != 0)
+        return seed;
+    else
+    {
+        struct timespec t, r;
+        clock_getres ( CLOCK_REALTIME, &r );
+        clock_gettime( CLOCK_REALTIME, &t );
+
+        return t.tv_nsec / r.tv_nsec;
+    }
+  }
+
+#endif
 
 }
