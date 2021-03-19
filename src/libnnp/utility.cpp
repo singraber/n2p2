@@ -319,11 +319,15 @@ double pow_int(double x, int n)
     return result;
 }
 
+
 #ifdef _WIN32
 
   unsigned long setupSeed(const char* inputSeed)
   {
-    if ((inputSeed == "time") || (inputSeed == "TIME"))
+    unsigned long seed = atoi(inputSeed);
+    if (seed != 0)
+        return seed;
+    else
     {
         unsigned long seed = generateSeed();
         FILETIME       t;
@@ -334,8 +338,6 @@ double pow_int(double x, int n)
 
         return i.QuadPart / 1000;
     }
-    else
-        return atoi(inputSeed);
   }
 
 #else // POSIX, presumably
