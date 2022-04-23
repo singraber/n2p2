@@ -75,7 +75,7 @@ version:
 	@sed -i.bak -E "s/(N2P2_GIT_VERSION) .*/\1 \"$(GIT_VERSION)\"/" version.h
 	@$(eval GIT_REV = $(shell git rev-parse HEAD))
 	@sed -i.bak -E "s/(N2P2_GIT_REV) .*/\1 \"$(GIT_REV)\"/" version.h
-	@$(eval GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD))
+	@$(eval GIT_BRANCH = $(subst /,_,$(shell git rev-parse --abbrev-ref HEAD)))
 	@sed -i.bak -E "s/(N2P2_GIT_BRANCH) .*/\1 \"$(GIT_BRANCH)\"/" version.h
 	@rm version.h.bak
 
