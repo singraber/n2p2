@@ -1,5 +1,5 @@
 <map id="nnp::SymFncStatistics::Container::reset" name="nnp::SymFncStatistics::Container::reset">
-<area shape="rect" id="node1" title="Reset all values." alt="" coords="5,39,171,80"/>
-<area shape="rect" id="node2" href="$classnnp_1_1SymFncStatistics.html#a70f4c0f9cef912c8d77f3fa9d5493c0a" title="Reset extrapolation warnings for all symmetry functions at once." alt="" coords="219,5,429,47"/>
-<area shape="rect" id="node3" href="$classnnp_1_1SymFncStatistics.html#ad9942b202d558d254e0804b81aff7915" title="Reset statistics for all symmetry functions at once." alt="" coords="241,71,407,112"/>
+<area shape="rect" id="node1" title="Reset all values." alt="" coords="5,39,172,80"/>
+<area shape="rect" id="node2" href="$classnnp_1_1SymFncStatistics.html#a70f4c0f9cef912c8d77f3fa9d5493c0a" title="Reset extrapolation warnings for all symmetry functions at once." alt="" coords="220,5,431,47"/>
+<area shape="rect" id="node3" href="$classnnp_1_1SymFncStatistics.html#ad9942b202d558d254e0804b81aff7915" title="Reset statistics for all symmetry functions at once." alt="" coords="242,71,409,112"/>
 </map>

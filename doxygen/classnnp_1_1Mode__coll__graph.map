@@ -1,6 +1,6 @@
 <map id="nnp::Mode" name="nnp::Mode">
-<area shape="rect" id="node1" title="Base class for all NNP applications." alt="" coords="577,368,667,395"/>
-<area shape="rect" id="node2" href="$classnnp_1_1ElementMap.html" title="Contains element map." alt="" coords="245,5,380,32"/>
+<area shape="rect" id="node1" title="Base class for all NNP applications." alt="" coords="577,368,668,395"/>
+<area shape="rect" id="node2" href="$classnnp_1_1ElementMap.html" title="Contains element map." alt="" coords="245,5,381,32"/>
 <area shape="rect" id="node3" href="$classnnp_1_1Log.html" title="Logging class for library output." alt="" coords="274,148,351,175"/>
 <area shape="rect" id="node4" title=" " alt="" coords="13,112,64,139"/>
 <area shape="rect" id="node5" title=" " alt="" coords="273,199,353,225"/>

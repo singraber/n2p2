@@ -1,5 +1,5 @@
 <map id="nnp::Mode::physical" name="nnp::Mode::physical">
-<area shape="rect" id="node1" title="Undo normalization for a given property." alt="" coords="256,97,407,123"/>
+<area shape="rect" id="node1" title="Undo normalization for a given property." alt="" coords="256,97,408,123"/>
 <area shape="rect" id="node2" href="$classnnp_1_1InterfaceLammps.html#a680dca82d8c1670ac2effe7ba7df60fc" title="Return energy contribution of one atom." alt="" coords="23,5,191,47"/>
 <area shape="rect" id="node3" href="$nnp-dataset_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" title=" " alt="" coords="79,71,134,98"/>
 <area shape="rect" id="node4" href="$classnnp_1_1Training.html#a86b54c7bf103e141f9870ee2bbb30c4f" title="Print preferred error metric and timing information on screen." alt="" coords="15,122,198,149"/>

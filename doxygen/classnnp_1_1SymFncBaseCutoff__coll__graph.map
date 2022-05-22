@@ -1,8 +1,8 @@
 <map id="nnp::SymFncBaseCutoff" name="nnp::SymFncBaseCutoff">
-<area shape="rect" id="node1" title="Intermediate class for SFs based on cutoff functions." alt="" coords="229,331,405,357"/>
-<area shape="rect" id="node2" href="$classnnp_1_1SymFnc.html" title="Symmetry function base class." alt="" coords="114,241,219,268"/>
+<area shape="rect" id="node1" title="Intermediate class for SFs based on cutoff functions." alt="" coords="230,331,407,357"/>
+<area shape="rect" id="node2" href="$classnnp_1_1SymFnc.html" title="Symmetry function base class." alt="" coords="113,241,220,268"/>
 <area shape="rect" id="node3" title=" " alt="" coords="133,5,200,32"/>
-<area shape="rect" id="node5" href="$classnnp_1_1CutoffFunction.html" title=" " alt="" coords="244,241,391,268"/>
-<area shape="rect" id="node4" title=" " alt="" coords="415,241,502,268"/>
-<area shape="rect" id="node6" title=" " alt="" coords="527,241,617,268"/>
+<area shape="rect" id="node5" href="$classnnp_1_1CutoffFunction.html" title=" " alt="" coords="245,241,393,268"/>
+<area shape="rect" id="node4" title=" " alt="" coords="417,241,503,268"/>
+<area shape="rect" id="node6" title=" " alt="" coords="528,241,619,268"/>
 </map>

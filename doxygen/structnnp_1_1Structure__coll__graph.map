@@ -1,6 +1,6 @@
 <map id="nnp::Structure" name="nnp::Structure">
 <area shape="rect" id="node1" title="Storage for one atomic configuration." alt="" coords="707,356,820,383"/>
-<area shape="rect" id="node2" href="$classnnp_1_1ElementMap.html" title="Contains element map." alt="" coords="276,123,411,149"/>
+<area shape="rect" id="node2" href="$classnnp_1_1ElementMap.html" title="Contains element map." alt="" coords="275,123,411,149"/>
 <area shape="rect" id="node3" title=" " alt="" coords="5,79,92,105"/>
 <area shape="rect" id="node4" title=" " alt="" coords="318,173,369,200"/>
 <area shape="rect" id="node5" title=" " alt="" coords="19,300,79,327"/>

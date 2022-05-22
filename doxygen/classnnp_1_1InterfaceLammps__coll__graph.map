@@ -1,6 +1,6 @@
 <map id="nnp::InterfaceLammps" name="nnp::InterfaceLammps">
 <area shape="rect" id="node1" title=" " alt="" coords="704,513,872,540"/>
-<area shape="rect" id="node2" href="$classnnp_1_1Mode.html" title="Base class for all NNP applications." alt="" coords="398,220,487,247"/>
+<area shape="rect" id="node2" href="$classnnp_1_1Mode.html" title="Base class for all NNP applications." alt="" coords="397,220,488,247"/>
 <area shape="rect" id="node3" title=" " alt="" coords="23,93,74,120"/>
 <area shape="rect" id="node8" title=" " alt="" coords="361,347,524,373"/>
 <area shape="rect" id="node11" href="$structnnp_1_1Structure.html" title="Storage for one atomic configuration." alt="" coords="386,488,499,515"/>
