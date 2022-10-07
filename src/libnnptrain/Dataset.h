@@ -190,6 +190,13 @@ public:
      * CAUTION: Make sure files are completely written and closed.
      */
     void        combineFiles(std::string filePrefix) const;
+    /** Calculate and collect the latent space data from NNs.
+     *
+     * @param[in,out] structure Structure for which all atom's latent space
+     *                          will be collected.
+     */
+    std::vector<
+    std::vector<double>> calculateLatentSpace(Structure& structure);
 
     /// All structures in this dataset.
     std::vector<Structure> structures;

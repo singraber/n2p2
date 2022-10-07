@@ -1769,3 +1769,26 @@ void Dataset::combineFiles(string filePrefix) const
 
     return;
 }
+
+vector<
+vector<double>> Dataset::calculateLatentSpace(Structure& structure)
+{
+    if (nnpType != NNPType::SHORT_ONLY)
+    {
+        throw runtime_error("ERROR: Latent space data collection only "
+                            "implemented for short-range HDNNPs.\n");
+    }
+
+    vector<vector<double>> neuron_values;
+    for (vector<Atom>::iterator it = structure.atoms.begin();
+         it != structure.atoms.end(); ++it)
+    {
+        NeuralNetwork& nn = elements.at(it->element)
+                            .neuralNetworks.at("short");
+        nn.setInput(&((it->G).front()));
+        nn.propagate();
+        neuron_values.push_back(nn.collectLatentSpace());
+    }
+
+    return neuron_values;
+}

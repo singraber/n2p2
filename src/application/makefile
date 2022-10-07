@@ -55,6 +55,7 @@ APP_DATASET=nnp-atomenv \
 	    nnp-checkf \
 	    nnp-comp2 \
             nnp-dataset \
+            nnp-latent \
             nnp-norm \
             nnp-scaling
 

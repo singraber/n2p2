@@ -343,6 +343,9 @@ public:
      * Counters and summation variables for neuron statistics are reset.
      */
     void                     resetNeuronStatistics();
+    /** Return latent space, i.e., neuron values from layer before output.
+     */
+    std::vector<double>      collectLatentSpace();
     //void   writeStatus(int, int);
     long                     getMemoryUsage();
     /** Print neural network architecture.

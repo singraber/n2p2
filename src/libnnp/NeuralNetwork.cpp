@@ -391,6 +391,19 @@ void NeuralNetwork::propagate()
     return;
 }
 
+vector<double> NeuralNetwork::collectLatentSpace()
+{
+    vector<double> values;
+    Layer* layer = &layers[numLayers - 2];
+
+    for (int i = 0; i < layer->numNeurons; i++)
+    {
+        values.push_back(layer->neurons[i].value);
+    }
+
+    return values;
+}
+
 void NeuralNetwork::calculateDEdG(double *dEdG) const
 {
     double** inner = new double*[numHiddenLayers];
