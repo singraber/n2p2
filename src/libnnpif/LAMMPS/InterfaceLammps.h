@@ -31,6 +31,7 @@ class InterfaceLammps : public Mode
 {
 public:
     InterfaceLammps();
+    virtual ~InterfaceLammps() {};
 
     /** Initialize the LAMMPS interface.
      *

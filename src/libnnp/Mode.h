@@ -91,6 +91,8 @@ public:
     };
 
     Mode();
+    virtual ~Mode() {};
+
     /** Write welcome message with version information.
      */
     void                     initialize();
